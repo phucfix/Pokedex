@@ -1,6 +1,9 @@
 package main
 
-import "testing"
+import (
+    "testing"
+    "fmt"
+)
 
 func TestCleanInput(t *testing.T) {
     cases := []struct {
@@ -43,5 +46,45 @@ func TestCleanInput(t *testing.T) {
                         i, word, expectedWord)
             }
         }
+    }
+}
+
+func TestParseCommadLine(t *testing.T) {
+    cases := []struct {
+        input             string
+        expectedCommand   string
+        expectedParameter string
+    } {
+        {
+            input:             "",
+            expectedCommand:   "",
+            expectedParameter: "",
+        },
+        {
+            input:             "  hello",
+            expectedCommand:   "hello",
+            expectedParameter: "",
+        },
+        {
+            input:             " hello world   ",
+            expectedCommand:   "hello",
+            expectedParameter: "world",
+        },
+    }
+
+    for i, c := range cases {
+        t.Run(fmt.Sprintf("Test case %d", i), func(t *testing.T) {
+            actualCommand, actualParameter := parseCommandLine(c.input)
+            if actualCommand != c.expectedCommand {
+                t.Errorf("Command not match: Actual(%s) - Expected(%s)",
+                         actualCommand, c.expectedCommand)
+                return
+            }
+            if actualParameter != c.expectedParameter {
+                t.Errorf("Parameter not match: Actual(%s) - Expected(%s)",
+                         actualParameter, c.expectedParameter)
+                return
+            }
+        })
     }
 }

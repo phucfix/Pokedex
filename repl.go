@@ -26,14 +26,19 @@ func startRepl(cfg *config) {
 
         // Get input that user typed (exclude '\n' char)
         userInput := scanner.Text()
-        userCommand := strings.Fields(userInput)[0]
+        
+        // Split the user input to command and parameter
+        userCommand, parameter := parseCommandLine(userInput)
+        if userCommand == "" {
+            continue
+        }
 
         command, exists := getCommand()[userCommand]        
         if !exists {
             fmt.Printf("Unknown command: %s\n", userCommand)
             continue
         }
-        if err := command.callback(cfg); err != nil {
+        if err := command.callback(cfg, parameter); err != nil {
             fmt.Printf("%s: %v\n", command.name, err)
             continue
         }
@@ -46,10 +51,22 @@ func cleanInput(text string) []string {
     return words
 }
 
+func parseCommandLine(userInput string) (string, string) {
+    cleanUserInput := strings.TrimSpace(userInput)
+    part := strings.SplitN(cleanUserInput, " ", 2)
+    command := part[0]
+    parameter := ""
+    if len(part) != 1 {
+        parameter = part[1]
+    }
+
+    return command, parameter
+}
+
 type cliCommand struct {
     name        string
     description string
-    callback    func(*config) error
+    callback    func(*config, string) error
 }
 
 func getCommand() map[string]cliCommand {
@@ -71,8 +88,13 @@ func getCommand() map[string]cliCommand {
         },
         "mapb": {
             name:        "mapb",
-            description: " Displays the next 20 locations",
+            description: "Displays the next 20 locations",
             callback:    commandMapb,
+        },
+        "explore": {
+            name:        "explore",
+            description: "Displays list of all the Pokemon located in there",
+            callback:    commandExplore,
         },
     }
 }
